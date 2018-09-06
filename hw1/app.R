@@ -10,6 +10,8 @@
 library(shiny)
 
 # Define UI for application that draws a histogram
+what <- "yes"
+what
 ui <- fluidPage(
    
    # Application title
