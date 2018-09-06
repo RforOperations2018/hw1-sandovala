@@ -31,19 +31,18 @@ ui <- fluidPage(
                                       "Obi-Wan Kenobi", "R2-D2", "Dexter Jettster")),
              sliderInput("birthSelect",
                          "Year of Birth:",
-                         min = min(meltwars$variable, na.rm = T),
-                         max = max(meltwars$variable, na.rm = T),
-                         value = c(min(meltwars$variable, na.rm = T), min(meltwars$variable, na.rm = T),
-                                   max = max(meltwars$variable, na.rm = T)), 
-                         step = 50 )
+                         min = min(starwars$birth_year, na.rm = T),
+                         max = max(starwars$birth_year, na.rm = T),
+                         value = c(min(starwars$birth_year, na.rm = T), max(starwars$birth_year, na.rm = T)), 
+                         step = 100)
            )       
-           
     ),
     column(8,
            plotlyOutput("plot")
     )
   ),
   fluidRow(
+    tags$style(type = "text/css", "#table {padding-left: 15px; padding-right: 25px;}"),
     DT::dataTableOutput("table")
   )
 )
@@ -51,14 +50,11 @@ ui <- fluidPage(
 # Define server logic
 server <- function(input, output) {
   output$plot <- renderPlotly({
-    mass <- select(filter(meltwars,
-                          variable == "mass"),
-                   c(name:value))
-    dat <- subset(mass, name %in% input$char_select)
-    
+    dat <- subset(starwars, name %in% input$char_select & birth_year >= input$birthSelect[1] & birth_year <= input$birthSelect[2])
+
     ggplot(data = dat, 
            aes(x = name, 
-               y = as.numeric(value), 
+               y = mass, 
                fill = name)) + 
       geom_bar(stat = "identity") +
       ylab("Mass") +
