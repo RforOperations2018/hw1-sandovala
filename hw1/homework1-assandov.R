@@ -1,16 +1,21 @@
 
-##Homework 9/6/18 alex.sandoval- Grid
-#install.packages("tidyverse")
+# Homework 9/6/18 alex.sandoval- Grid
+# upload packages
 library(shiny)
 library(reshape2)
 library(dplyr)
 library(plotly)
 library(DT)
 
+# upload data
 starwars <- starwars
+
+# take out some fields
 starwars$films <- NULL
 starwars$vehicles <- NULL
 starwars$starships <- NULL
+
+# melt starwars
 meltwars <- melt(starwars, id = "name")
 meltwars$name <- as.factor(meltwars$name)
 
@@ -18,55 +23,62 @@ pdf(NULL)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  titlePanel("Star Wars Grid"),
+  titlePanel("Star Wars Characters Vary by Age and Mass"),
   fluidRow(
-    column(4,
+    column(12,
+           plotlyOutput("plot")
+    ),
+    column(6,
            wellPanel(
+             # an input element to select various characters from the semi-popular film known as 'Star Wars'
              selectInput("char_select",
                          "Characters:",
                          choices = levels(meltwars$name),
                          multiple = TRUE,
                          selectize = TRUE,
-                         selected = c("Luke Skywalker", "Darth Vader", "Jabba Desilijic Tiure",
-                                      "Obi-Wan Kenobi", "R2-D2", "Dexter Jettster")),
+                         selected = c("Luke Skywalker", "Darth Vader", "Han Solo", "Yoda", "Jabba Desilijic Tiure",
+                                      "Obi-Wan Kenobi", "R2-D2", "Dexter Jettster")
+                         ),
+             # an input element for a slider range to view the year a character was born
              sliderInput("birthSelect",
-                         "Year of Birth:",
+                         "Birth Year:",
                          min = min(starwars$birth_year, na.rm = T),
                          max = max(starwars$birth_year, na.rm = T),
                          value = c(min(starwars$birth_year, na.rm = T), max(starwars$birth_year, na.rm = T)), 
-                         step = 100)
-           )       
-    ),
-    column(8,
-           plotlyOutput("plot")
-    )
-  ),
+                         step = 100
+                        )
+                    )       
+          )
+          ),
   fluidRow(
+    # add white space to clean things up
     tags$style(type = "text/css", "#table {padding-left: 15px; padding-right: 25px;}"),
     DT::dataTableOutput("table")
-  )
-)
+          )
+                )
 
 # Define server logic
 server <- function(input, output) {
   output$plot <- renderPlotly({
-    dat <- subset(starwars, name %in% input$char_select & birth_year >= input$birthSelect[1] & birth_year <= input$birthSelect[2])
+    starwars.sub <- subset(starwars, name %in% input$char_select & birth_year >= input$birthSelect[1] & birth_year <= input$birthSelect[2])
 
-    ggplot(data = dat, 
-           aes(x = name, 
+    ggplot(data = starwars.sub, 
+           aes(x = name,
                y = mass, 
                fill = name)) + 
       geom_bar(stat = "identity") +
-      ylab("Mass") +
-      xlab("") +
-      theme(axis.text.x = element_text(angle = 45, 
+      ylab("Mass") +  # y axis title
+      xlab("") +  # no title on the x axis
+      # edit the text of the x axis
+      theme(axis.text.x = element_text(angle = 30, 
                                        hjust = 1,
-                                       size = 10),
+                                       size = 8),
+            # remove the title of the legend
             legend.title = element_blank())
   })
   output$table <- DT::renderDataTable({
     subset(starwars, name %in% input$char_select, 
-           select = c(name, height, mass, birth_year, homeworld, species))
+           select = c(name, birth_year, height, mass, gender, species, homeworld))
   })
 }
 
