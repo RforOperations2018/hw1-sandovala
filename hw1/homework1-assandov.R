@@ -31,6 +31,7 @@ ui <- fluidPage(
     column(6,
            wellPanel(
              # an input element to select various characters from the semi-popular film known as 'Star Wars'
+             # Jokes in the comments! Next time you might want to try the inputPanel, which places inputs next to eachother. A few pts off UI.
              selectInput("char_select",
                          "Characters:",
                          choices = levels(meltwars$name),
